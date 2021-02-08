@@ -1,0 +1,17 @@
+# Environments
+.env
+.env.db
+.venv
+env/
+venv/
+
+.idea
+
+# Django
+__pycache__
+/static/
+/media/
+
+db.sqlite3
+*.sqlite3
+
