@@ -1,19 +1,4 @@
 #!/bin/sh
 
-echo DEBUG=0 >> .env
-echo SQL_ENGINE=$SQL_ENGINE >> .env
-echo DATABASE=postgres >> .env
-
-echo ALLOWED_HOST=$EC2_PUBLIC_IP_ADDRESS >> .env
-echo SECRET_KEY=$SECRET_KEY >> .env
-echo SQL_DATABASE=$SQL_DATABASE >> .env
-echo SQL_USER=$SQL_USER >> .env
-echo SQL_PASSWORD=$SQL_PASSWORD >> .env
-echo SQL_HOST=$SQL_HOST >> .env
-echo SQL_PORT=$SQL_PORT >> .env
-echo WEB_IMAGE=$IMAGE:web  >> .env
-echo NGINX_IMAGE=$IMAGE:nginx  >> .env
-echo CI_REGISTRY_USER=$CI_REGISTRY_USER   >> .env
-echo CI_JOB_TOKEN=$CI_JOB_TOKEN  >> .env
-echo CI_REGISTRY=$CI_REGISTRY  >> .env
-echo IMAGE=$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME >> .env
+# Takes all env variables with prefix "DJANGO_" and write them in .env without prefix
+export | grep DJANGO_ | sed -e 's/DJANGO_//g' | sed -e 's/declare -x //g' > .env

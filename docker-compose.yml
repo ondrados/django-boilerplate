@@ -1,31 +1,224 @@
-version: "3.7"
-
+version: "3.8"
 services:
-  web:
-    build: ./src
-    command: python manage.py runserver 0.0.0.0:8000
+  traefik:
+    # Use the latest v2.8.x Traefik image available
+    image: traefik:v2.8
     ports:
-      - 8000:8000
-    environment:
-      - DEBUG=1
-      - SECRET_KEY=foo
-      - SQL_ENGINE=django.db.backends.postgresql
-      - SQL_DATABASE=devel
-      - SQL_USER=user
-      - SQL_PASSWORD=password
-      - SQL_HOST=db
-      - SQL_PORT=5432
-      - DATABASE=postgres
-    depends_on:
-      - db
-  db:
-    image: postgres:12.2-alpine
+      # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
+      - "80:80"
+      # Listen on port 443, default for HTTPS
+      - "443:443"
+    restart: always
+    labels:
+      # Enable Traefik for this service, to make it available in the public network
+      - traefik.enable=true
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      # Make Traefik use this domain in HTTP
+      - traefik.http.routers.traefik-dashboard-http.entrypoints=web
+      - traefik.http.routers.traefik-dashboard-http.rule=Host(`traefik.${DOMAIN?Variable not set}`)
+      # traefik-https the actual router using HTTPS
+      - traefik.http.routers.traefik-dashboard-https.entrypoints=websecure
+      - traefik.http.routers.traefik-dashboard-https.rule=Host(`traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-https.tls=true
+      # Use the "le" (Let's Encrypt) resolver created below
+      - traefik.http.routers.traefik-dashboard-https.tls.certresolver=le
+      # Use the special Traefik service api@internal with the web UI/Dashboard
+      - traefik.http.routers.traefik-dashboard-https.service=api@internal
+      # https-redirect middleware to redirect HTTP to HTTPS
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      # traefik-http set up only to use the middleware to redirect to https
+      - traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect
+      # admin-auth middleware with HTTP Basic auth
+      # Using the environment variables USERNAME and HASHED_PASSWORD
+      - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+      # Enable HTTP Basic auth, using the middleware created above
+      - traefik.http.routers.traefik-dashboard-https.middlewares=admin-auth
+      # Enable prometheus metrics
+      - traefik.http.services.prometheus.loadbalancer.server.port=9100
+      - traefik.http.routers.prometheus.rule=PathPrefix(`/metrics`)
+      - traefik.http.routers.prometheus.service=prometheus@internal
+      - traefik.http.routers.prometheus.entrypoints=metrics
+#      - traefik.http.routers.prometheus.middlewares=admin-auth
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the volume to store the certificates
+      - traefik-public-certificates:/certificates
+    command:
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - --providers.docker
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - --providers.docker.exposedbydefault=false
+      # Create an entrypoint "web" listening on port 80
+      - --entrypoints.web.address=:80
+      # Create an entrypoint "websecure" listening on port 443
+      - --entrypoints.websecure.address=:443
+      # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      # Store the Let's Encrypt certificates in the mounted volume
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      # Use the TLS Challenge for Let's Encrypt
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      # Enable the access log, with HTTP requests
+      - --accesslog
+      # Enable the Traefik log, for configurations and errors
+      - --log
+      # Enable the Dashboard and API
+      - --api.dashboard=true
+      - --entryPoints.metrics.address=:9100
+      - --metrics.prometheus=true
+      - --metrics.prometheus.addEntryPointsLabels=true
+      - --metrics.prometheus.addServicesLabels=true
+      - --metrics.prometheus.manualrouting=true
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publicly available with HTTPS
+      - traefik-public
+
+  django: &django
+    image: ${IMAGE}
+    command: /usr/src/start-prod.sh
+    restart: always
+    env_file:
+      - .env
+    labels:
+      # Enable Traefik for this specific "django" service
+      - traefik.enable=true
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.django.loadbalancer.server.port=8000
+      # Make Traefik use this domain in HTTP
+      - traefik.http.routers.django-http.entrypoints=web
+      - traefik.http.routers.django-http.rule=Host(`${DOMAIN?Variable not set}`)
+      # Make Traefik use this domain in HTTPS
+      - traefik.http.routers.django-https.entrypoints=websecure
+      - traefik.http.routers.django-https.rule=Host(`${DOMAIN?Variable not set}`)
+      - traefik.http.routers.django-https.tls=true
+      # Use the "le" (Let's Encrypt) resolver
+      - traefik.http.routers.django-https.tls.certresolver=le
+      # https-redirect middleware to redirect HTTP to HTTPS
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      # Middleware to redirect HTTP to HTTPS
+      - traefik.http.routers.django-http.middlewares=https-redirect
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publicly available with HTTPS
+      - traefik-public
+
+
+  ### MONITORING
+  prometheus:
+    image: ${IMAGE}:prometheus
+    volumes:
+      - prometheus-data:/prometheus
+    restart: always
+    labels:
+      # Enable Traefik for this specific "prometheus" service
+      - traefik.enable=true
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.prometheus-backend.loadbalancer.server.port=9090
+      # Make Traefik use this domain in HTTP
+      - traefik.http.routers.prometheus-backend-http.entrypoints=web
+      - traefik.http.routers.prometheus-backend-http.rule=Host(`prometheus.${DOMAIN?Variable not set}`)
+      # Make Traefik use this domain in HTTPS
+      - traefik.http.routers.prometheus-backend-https.entrypoints=websecure
+      - traefik.http.routers.prometheus-backend-https.rule=Host(`prometheus.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.prometheus-backend-https.tls=true
+      # Use the "le" (Let's Encrypt) resolver
+      - traefik.http.routers.prometheus-backend-https.tls.certresolver=le
+      # https-redirect middleware to redirect HTTP to HTTPS
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      # Middleware to redirect HTTP to HTTPS
+      - traefik.http.routers.prometheus-backend-http.middlewares=https-redirect
+      - traefik.http.routers.prometheus-backend-https.middlewares=admin-auth
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publicly available with HTTPS
+      - traefik-public
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: always
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=devel
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    labels:
+      # Enable Traefik for this specific "prometheus" service
+      - traefik.enable=true
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      # Make Traefik use this domain in HTTP
+      - traefik.http.routers.grafana-http.entrypoints=web
+      - traefik.http.routers.grafana-http.rule=Host(`grafana.${DOMAIN?Variable not set}`)
+
+      # Make Traefik use this domain in HTTPS
+      - traefik.http.routers.grafana-https.entrypoints=websecure
+      - traefik.http.routers.grafana-https.rule=Host(`grafana.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.grafana-https.tls=true
+      # Use the "le" (Let's Encrypt) resolver
+      - traefik.http.routers.grafana-https.tls.certresolver=le
+      # https-redirect middleware to redirect HTTP to HTTPS
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      # Middleware to redirect HTTP to HTTPS
+      - traefik.http.routers.grafana-http.middlewares=https-redirect
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publicly available with HTTPS
+      - traefik-public
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: always
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publicly available with HTTPS
+      - traefik-public
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    restart: always
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publicly available with HTTPS
+      - traefik-public
 
 volumes:
-  postgres_data:
+  # Create a volume to store the certificates, there is a constraint to make sure
+  # Traefik is always deployed to the same Docker node with the same volume containing
+  # the HTTPS certificates
+  traefik-public-certificates:
+  prometheus-data:
+  grafana-data:
+
+
+networks:
+  # Use the previously created public network "traefik-public", shared with other
+  # services that need to be publicly available via this Traefik
+  traefik-public:
+    external: true
