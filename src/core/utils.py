@@ -1,5 +1,6 @@
-import time
 import functools
+import time
+
 from django.db import connection, reset_queries
 
 

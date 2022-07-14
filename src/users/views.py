@@ -1,8 +1,8 @@
 from django.conf import settings
-from rest_framework import permissions, status, generics
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import User
 from .serializers import RegisterSerializer, UserSerializer

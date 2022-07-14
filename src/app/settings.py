@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -13,7 +14,7 @@ DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
 
 SECRET_KEY = os.environ.get("SECRET_KEY", default=get_random_secret_key())
 
-APP_URL = os.environ.get('APP_URL', default="http://localhost:8000")
+APP_URL = os.environ.get("APP_URL", default="http://localhost:8000")
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -48,9 +49,7 @@ THIRD_PARTY_APPS = [
     "storages",
 ]
 
-MY_APPS = [
-    "users"
-]
+MY_APPS = ["users"]
 
 INSTALLED_APPS = FIRST_PARTY_APPS + THIRD_PARTY_APPS + MY_APPS
 
@@ -99,7 +98,6 @@ REST_FRAMEWORK = {
         # "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-
 }
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
@@ -108,8 +106,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-    "AUTH_HEADER_TYPES": ("Bearer", ),
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken", ),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
 
 DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = True
@@ -150,7 +148,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
 EMAIL_USE_TLS = True
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)

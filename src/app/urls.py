@@ -1,11 +1,10 @@
-from django.contrib import admin
-from django.urls import path, re_path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.http import JsonResponse
+from django.urls import include, path
 
-from users.urls import urlpatterns_auth
-from users.urls import urlpatterns_user
+from users.urls import urlpatterns_auth, urlpatterns_user
 
 
 def home(request):
@@ -17,21 +16,21 @@ def health_check(request):
 
 
 urlpatterns_api = [
-    path('auth/', include((urlpatterns_auth, 'auth-api'), namespace='auth-api')),
-    path('user/', include((urlpatterns_user, 'user-api'), namespace='user-api')),
+    path("auth/", include((urlpatterns_auth, "auth-api"), namespace="auth-api")),
+    path("user/", include((urlpatterns_user, "user-api"), namespace="user-api")),
 ]
 
 urlpatterns = [
-    path('', home, name='home'),
-    path('admin/', admin.site.urls),
-    path('api/', include(urlpatterns_api)),
-    path('health/', health_check),
+    path("", home, name="home"),
+    path("admin/", admin.site.urls),
+    path("api/", include(urlpatterns_api)),
+    path("health/", health_check),
 ]
 
 if settings.DEBUG:
 
     def trigger_error(request):
-        division_by_zero = 1 / 0
+        1 / 0
 
-    urlpatterns += path('sentry-debug/', trigger_error),
+    urlpatterns += (path("sentry-debug/", trigger_error),)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
