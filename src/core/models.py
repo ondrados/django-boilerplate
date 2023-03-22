@@ -5,7 +5,6 @@ from .managers import BaseManager
 
 
 class BaseModel(models.Model):
-
     time_created = models.DateTimeField(auto_now_add=True, null=True)
     time_updated = models.DateTimeField(auto_now=True, editable=False, null=True)
     time_deleted = models.DateTimeField(editable=False, null=True)

@@ -35,3 +35,9 @@ migrations:
 # Run migrations for application
 migrate:
 	docker exec -it {{BACKEND_CONTAINER}} python manage.py migrate
+
+lint:
+    flake8
+
+format:
+    black .
