@@ -38,5 +38,4 @@ deploy:
     - docker -H ssh://$SSH_USER@$SSH_SERVER image prune -f
   only:
     - main
-  rules:
-    - when: manual
+  when: manual
