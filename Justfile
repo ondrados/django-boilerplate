@@ -1,5 +1,3 @@
-BACKEND_CONTAINER := "django-boilerplate-django-1"
-
 # default recipe to display help information
 default:
   @just --list
@@ -14,27 +12,27 @@ run-force:
 
 # Go inside django docker container
 cli:
-	docker exec -it {{BACKEND_CONTAINER}} bash
+	docker compose -f docker-compose-local.yml exec -it django bash
 
 # Run shell_plus for application
 shell:
-	docker exec -it {{BACKEND_CONTAINER}} python manage.py shell_plus
+	docker compose -f docker-compose-local.yml exec -it django python manage.py shell_plus
 
 # Create superuser
 superuser:
-	docker exec -it {{BACKEND_CONTAINER}} python manage.py createsuperuser
+	docker compose -f docker-compose-local.yml exec -it django python manage.py createsuperuser
 
 # Run fixtures for application
 fixtures:
-	docker exec -it {{BACKEND_CONTAINER}} sh ./load-fixtures.sh
+	docker compose -f docker-compose-local.yml exec -it django sh ./load-fixtures.sh
 
 # Create migrations for application
 migrations:
-	docker exec -it {{BACKEND_CONTAINER}} python manage.py makemigrations
+	docker compose -f docker-compose-local.yml exec -it django python manage.py makemigrations
 
 # Run migrations for application
 migrate:
-	docker exec -it {{BACKEND_CONTAINER}} python manage.py migrate
+	docker compose -f docker-compose-local.yml exec -it django python manage.py migrate
 
 lint:
     flake8
