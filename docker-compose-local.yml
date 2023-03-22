@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   django: &django
-    build: ./src
+    build:
+      context: ./src
+      dockerfile: Dockerfile
     command: /usr/src/start.sh
     volumes:
       - ./src/:/usr/src/

@@ -1,20 +1,18 @@
 import os
 from datetime import timedelta
+from pathlib import Path
 
-from django.core.management.utils import get_random_secret_key
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+# Build paths inside the project like this: BASE_DIR / "subdir".
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get("SECRET_KEY", default="django-insecure-#_lhd5%)^%)p$-ce19&r=f1_z!nqx&)shy8$o^!q!x)=4pz$u!")
+
+# SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
-
-SECRET_KEY = os.environ.get("SECRET_KEY", default=get_random_secret_key())
-
-APP_URL = os.environ.get("APP_URL", default="http://localhost:8000")
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -29,7 +27,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
-FIRST_PARTY_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -49,9 +47,12 @@ THIRD_PARTY_APPS = [
     "storages",
 ]
 
-MY_APPS = ["users"]
+MY_APPS = [
+    "core",
+    "users"
+]
 
-INSTALLED_APPS = FIRST_PARTY_APPS + THIRD_PARTY_APPS + MY_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + MY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -74,7 +75,7 @@ ROOT_URLCONF = "app.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -112,15 +113,13 @@ SIMPLE_JWT = {
 
 DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = True
 
-
 # Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
         "USER": os.environ.get("SQL_USER", "user"),
         "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
         "HOST": os.environ.get("SQL_HOST", "localhost"),
@@ -128,10 +127,16 @@ DATABASES = {
     }
 }
 
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 AUTH_USER_MODEL = "users.User"
+REGISTRATION_OPEN = False
 
 # Password validation
-# https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -151,6 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
+
 EMAIL_USE_TLS = True
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
@@ -159,9 +165,8 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = "noreply@djangoboilerplate.org"
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/4.0/topics/i18n/
+# https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -169,13 +174,10 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 USE_S3 = bool(int(os.environ.get("USE_S3", default=0)))
 
@@ -198,10 +200,10 @@ if USE_S3:
 
 else:
     STATIC_URL = "/static/"
-    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+    STATIC_ROOT = BASE_DIR / "static"
     MEDIA_URL = "/media/"
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+    MEDIA_ROOT = BASE_DIR / "media"
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "templates/static/"),
+    BASE_DIR / "templates" / "static",
 ]
