@@ -19,10 +19,12 @@ services:
       - SQL_PASSWORD=password
       - SQL_HOST=db
       - SQL_PORT=5432
+      - REDIS_URL=redis://redis:6379
     env_file:
       - .env
     depends_on:
       - db
+
   db:
     image: postgres:12.2-alpine
     volumes:
@@ -32,5 +34,19 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=devel
 
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/var/lib/redis/data
+
+  celery-worker:
+    <<: *django
+    command: celery -A app.celery.app worker -l INFO
+    ports: [ ]
+    depends_on:
+      - django
+      - redis
+
 volumes:
   postgres_data:
+  redis_data:

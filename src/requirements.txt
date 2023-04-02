@@ -10,3 +10,8 @@ boto3
 django-storages
 tqdm
 django-rest-passwordreset
+celery
+django-celery-results
+django-redis
+# eventlet
+# django_celery_beat

@@ -111,6 +111,11 @@ services:
       # any other service that needs to be publicly available with HTTPS
       - traefik-public
 
+  celery-worker:
+    <<: *django
+    command: celery -A app.celery.app worker -l INFO
+    labels: [ ]
+
 
   ### MONITORING
   prometheus:
@@ -221,4 +226,3 @@ networks:
   # Use the previously created public network "traefik-public", shared with other
   # services that need to be publicly available via this Traefik
   traefik-public:
-    external: true
