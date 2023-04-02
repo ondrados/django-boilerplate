@@ -10,6 +10,7 @@ boto3
 django-storages
 tqdm
 django-rest-passwordreset
+django-health-check
 celery
 django-celery-results
 django-redis

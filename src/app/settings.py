@@ -40,6 +40,15 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "health_check",
+    "health_check.db",
+    "health_check.cache",
+    "health_check.storage",
+    "health_check.contrib.migrations",
+    "health_check.contrib.celery",
+    "health_check.contrib.celery_ping",
+    # "health_check.contrib.s3boto3_storage",
+    "health_check.contrib.redis",
     "django_extensions",
     "rest_framework",
     "rest_framework_simplejwt",

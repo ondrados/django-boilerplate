@@ -19,7 +19,7 @@ urlpatterns_api = [
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(urlpatterns_api)),
-    path("health/", health_check),
+    path("health/", include('health_check.urls')),
 ]
 
 if settings.DEBUG:
