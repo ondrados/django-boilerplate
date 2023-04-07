@@ -4,7 +4,7 @@ services:
   django: &django
     build:
       context: ./src
-      dockerfile: Dockerfile
+      dockerfile: multistage.Dockerfile
     command: /usr/src/start.sh
     volumes:
       - ./src/:/usr/src/
