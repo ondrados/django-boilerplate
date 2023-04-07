@@ -12,7 +12,7 @@ run-force:
 
 # Go inside django docker container
 cli:
-	docker compose -f docker-compose-local.yml exec -it django bash
+	docker compose -f docker-compose-local.yml exec -it django sh
 
 # Run shell_plus for application
 shell:
