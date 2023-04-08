@@ -1,5 +1,5 @@
-psycopg2
 django
+psycopg[c]
 gunicorn
 django-extensions
 djangorestframework
