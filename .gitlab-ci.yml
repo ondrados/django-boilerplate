@@ -29,6 +29,7 @@ deploy:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p -m 0600 /root/.ssh
     - ssh-keyscan $SSH_SERVER >> /root/.ssh/known_hosts
+    - echo "Host *\n    ControlMaster auto\n    ControlPath ~/.ssh/control-%C\n    ControlPersist yes" > /root/.ssh/config
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
     - chmod +x ./setup_env.sh
     - sh ./setup_env.sh
