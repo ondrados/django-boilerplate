@@ -17,7 +17,7 @@ RUN pip install --upgrade pip \
     && rm -rf requirements.txt
 
 
-FROM python:3.11-alpine
+FROM python:3.11-alpine as runtime
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -33,8 +33,17 @@ RUN apk add libpq netcat-openbsd
 COPY --from=base /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 COPY --from=base /usr/local/bin/ /usr/local/bin/
 
+# create a non-root user 'app_user'
+RUN adduser -DH app_user
+
 # copy project
 COPY . /usr/src/
+
+# change ownership of project files to app_user
+RUN chown -R app_user:app_user /usr/src/
+
+# switch to the 'app_user'
+USER app_user
 
 # run server
 CMD ["/usr/src/start.sh"]
