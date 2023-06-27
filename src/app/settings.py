@@ -146,7 +146,7 @@ CACHES = {
         "LOCATION": f"{REDIS_URL}/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        },
     }
 }
 
@@ -242,4 +242,3 @@ CELERY_RESULT_BACKEND = "django-db"
 # # http://docs.celeryproject.org/en/latest/userguide/configuration.html#beat-scheduler
 # CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_RESULT_EXTENDED = True
-
