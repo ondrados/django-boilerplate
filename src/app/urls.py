@@ -27,5 +27,12 @@ if settings.DEBUG:
     def trigger_error(request):
         return 1 / 0
 
-    urlpatterns += (path("sentry-debug/", trigger_error),)
+    def trigger_test_task(request):
+        from core.tasks import test_task
+        test_task.delay()
+        return JsonResponse({"status": "Ok"})
+
+
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += (path("sentry-debug/", trigger_error),)
+    urlpatterns += (path("test-task/", trigger_test_task),)
