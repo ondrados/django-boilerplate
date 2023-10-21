@@ -24,6 +24,8 @@ spec:
           envFrom:
             - secretRef:
                 name: gitlab-external-secret
+            - configMapRef:
+                name: django-configmap
       imagePullSecrets:
         - name: gitlab-registry-secret
 ---

@@ -1,0 +1,9 @@
+# django-configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-configmap
+data:
+  ALLOWED_HOSTS: "k8s.ondrados.com"
+  CORS_ALLOWED_ORIGINS: "https://k8s.ondrados.com"
