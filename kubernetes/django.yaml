@@ -22,6 +22,18 @@ spec:
             - /usr/src/start.sh
           ports:
             - containerPort: 8000
+#          livenessProbe:
+#            httpGet:
+#              path: /health/
+#              port: 8000
+#            initialDelaySeconds: 30
+#            periodSeconds: 30
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 8000
+#            initialDelaySeconds: 5
+#            periodSeconds: 5
           envFrom:
             - secretRef:
                 name: gitlab-external-secret

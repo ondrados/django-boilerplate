@@ -17,6 +17,7 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
 
+# TODO: figure out how to use this with kubernetes (internal health checks have different hosts)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:8000").split(",")
