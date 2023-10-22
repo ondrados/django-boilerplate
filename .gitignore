@@ -16,3 +16,6 @@ media
 
 db.sqlite3
 *.sqlite3
+
+dockerconfig.json
+gitlab-secret.yaml
