@@ -7,7 +7,7 @@ services:
       dockerfile: multistage.Dockerfile
       cache_from:
         - ${IMAGE}:latest
-    image: ${IMAGE}:latest
+    image: ${IMAGE}:${COMMIT_HASH}
 
   prometheus:
     build:
