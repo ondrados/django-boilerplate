@@ -16,8 +16,9 @@ build:
   script:
     - docker compose -f docker-compose-ci.yml pull || true
     - docker compose -f docker-compose-ci.yml build
-    - docker compose -f docker-compose-ci.yml push
-    - docker image prune -f
+    - docker tag ${IMAGE}:latest ${IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${IMAGE}:latest
   only:
     - main
 
@@ -36,7 +37,6 @@ deploy:
   script:
     - docker -H ssh://$SSH_USER@$SSH_SERVER -f docker-compose.yml compose pull
     - docker -H ssh://$SSH_USER@$SSH_SERVER -f docker-compose.yml compose up -d
-    - docker -H ssh://$SSH_USER@$SSH_SERVER image prune -f
   only:
     - main
   when: manual

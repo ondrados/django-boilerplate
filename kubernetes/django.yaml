@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - image: registry.gitlab.com/django26/django-boilerplate:latest
+          imagePullPolicy: Always
           name: django
           command:
             - /usr/src/start.sh
