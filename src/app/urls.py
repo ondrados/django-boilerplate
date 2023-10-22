@@ -17,7 +17,7 @@ urlpatterns_api = [
 ]
 
 urlpatterns = [
-    path("/", root),
+    path("", root),
     path("admin/", admin.site.urls),
     path("api/", include(urlpatterns_api)),
     path("health/", include("health_check.urls")),
