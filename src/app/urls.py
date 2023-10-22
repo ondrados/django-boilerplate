@@ -7,8 +7,8 @@ from django.urls import include, path
 from users.urls import urlpatterns_auth, urlpatterns_user
 
 
-def health_check(request):
-    return JsonResponse({"status": "Ok"})
+def root(request):
+    return JsonResponse({"hello": "world"})
 
 
 urlpatterns_api = [
@@ -17,6 +17,7 @@ urlpatterns_api = [
 ]
 
 urlpatterns = [
+    path("/", root),
     path("admin/", admin.site.urls),
     path("api/", include(urlpatterns_api)),
     path("health/", include("health_check.urls")),
