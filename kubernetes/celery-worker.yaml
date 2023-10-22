@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker-deployment
+  labels:
+    app: celery-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      containers:
+        - image: registry.gitlab.com/django26/django-boilerplate:latest
+          name: celery-worker
+          command:
+            - "celery"
+            - "-A"
+            - "app.celery.app"
+            - "worker"
+            - "-l"
+            - "INFO"
+          envFrom:
+            - secretRef:
+                name: gitlab-external-secret
+            - configMapRef:
+                name: django-configmap
+      imagePullSecrets:
+        - name: gitlab-registry-secret
