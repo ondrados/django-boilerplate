@@ -14,8 +14,6 @@ build:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - export COMMIT_HASH=$(git rev-parse --short HEAD)
-    - echo $COMMIT_HASH
     - docker compose -f docker-compose-ci.yml pull || true
     - docker compose -f docker-compose-ci.yml build
     - docker compose -f docker-compose-ci.yml push
