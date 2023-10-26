@@ -1,4 +1,13 @@
-# Kubernetes
+# Kubernetes on Digital Ocean
+
+1. install nginx-ingress and cert-manager from marketplace
+2. install external-secrets
+3. create gitlab access secret
+4. apply django-configmap
+5. apply issuers
+6. apply external secrets
+7. apply redis
+8. apply django
 
 ## private registry
 
