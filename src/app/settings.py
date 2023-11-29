@@ -49,7 +49,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    "django_rest_passwordreset",
+    "djoser",
     "corsheaders",
     "django_filters",
     "storages",
@@ -117,8 +117,22 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
-
-DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = True
+DJOSER = {
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "ACTIVATION_URL": "activation/{uid}/{token}",
+    "SEND_ACTIVATION_EMAIL": True,
+    "PASSWORD_RESET_CONFIRM_URL": "password-reset/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "EMAIL": {
+        "activation": "core.emails.ActivationEmail",
+        "confirmation": "core.emails.ConfirmationEmail",
+        "password_reset": "core.emails.PasswordResetEmail",
+        "password_changed_confirmation": "core.emails.PasswordChangedConfirmationEmail",
+        "username_reset": "core.emails.UsernameResetEmail",
+        "username_changed_confirmation": "core.emails.UsernameChangedConfirmationEmail",
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -176,13 +190,24 @@ EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
 
+# TODO: make this nicer
 EMAIL_USE_TLS = True
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-
 DEFAULT_FROM_EMAIL = "noreply@djangoboilerplate.org"
+
+AWS_SES_ACCESS_KEY_ID = os.environ.get("AWS_SES_ACCESS_KEY_ID")
+AWS_SES_SECRET_ACCESS_KEY = os.environ.get("AWS_SES_SECRET_ACCESS_KEY")
+AWS_SES_REGION_NAME = os.environ.get("AWS_SES_REGION_NAME", "eu-central-1")
+AWS_SES_REGION_ENDPOINT = f"email.{AWS_SES_REGION_NAME}.amazonaws.com"
+AWS_SES_FROM_EMAIL = os.environ.get("AWS_SES_FROM_EMAIL")
+USE_SES_V2 = True
+
+DOMAIN = os.environ.get("DOMAIN", "localhost:3000")
+SITE_NAME = os.environ.get("SITE_NAME", "Django Boilerplate")
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
