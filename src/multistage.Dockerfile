@@ -8,7 +8,8 @@ WORKDIR /usr/src
 RUN apk add --update --virtual .build-deps \
     build-base \
     python3-dev \
-    libpq-dev
+    libpq-dev \
+    libffi-dev
 
 # install python dependencies
 COPY ./requirements.txt /usr/src/
