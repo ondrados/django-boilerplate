@@ -13,12 +13,7 @@ services:
     environment:
       - DEBUG=1
       - SECRET_KEY=foo
-      - SQL_ENGINE=django.db.backends.postgresql
-      - SQL_DATABASE=devel
-      - SQL_USER=user
-      - SQL_PASSWORD=password
-      - SQL_HOST=db
-      - SQL_PORT=5432
+      - DATABASE_URL=postgres://user:password@db:5432/postgres
       - REDIS_URL=redis://redis:6379
     env_file:
       - .env
@@ -32,7 +27,7 @@ services:
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=devel
+      - POSTGRES_DB=postgres
 
   redis:
     image: redis:latest

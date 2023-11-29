@@ -2,6 +2,8 @@ django
 psycopg[c]
 gunicorn
 django-extensions
+django-split-settings
+dj-database-url
 djangorestframework
 djangorestframework-simplejwt
 django-cors-headers

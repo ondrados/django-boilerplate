@@ -1,6 +1,8 @@
 #!/bin/sh
 
 echo "Waiting for database..."
+SQL_HOST=$(echo $DATABASE_URL | cut -d@ -f2 | cut -d: -f1)
+SQL_PORT=$(echo $DATABASE_URL | cut -d@ -f2 | cut -d: -f2 | cut -d/ -f1)
 while ! nc -z $SQL_HOST $SQL_PORT; do
   sleep 0.1
 done

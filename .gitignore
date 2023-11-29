@@ -13,6 +13,7 @@ __pycache__
 static
 /media/
 media
+local.py
 
 db.sqlite3
 *.sqlite3
