@@ -20,7 +20,10 @@ DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
 # TODO: figure out how to use this with kubernetes (internal health checks have different hosts)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:8000").split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    "CORS_ALLOWED_ORIGINS", "http://localhost:8000"
+).split(",")
+# CORS_ALLOW_CREDENTIALS = True
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -50,6 +53,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "djoser",
+    "social_django",
     "corsheaders",
     "django_filters",
     "storages",
@@ -97,15 +101,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "app.wsgi.application"
 
+AUTHENTICATION_BACKENDS = [
+    "social_core.backends.google.GoogleOAuth2",
+    "django.contrib.auth.backends.ModelBackend"
+]
+
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "core.pagination.StandardResultsSetPagination",
     "PAGE_SIZE": 30,
     "SEARCH_PARAM": "q",
     # "DEFAULT_PERMISSION_CLASSES": [],
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "core.authentication.CustomJWTAuthentication",
         # "rest_framework.authentication.SessionAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
 }
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
@@ -117,6 +127,8 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
+
+SOCIAL_REDIRECT_URLS = os.environ.get("REDIRECT_URLS", "http://localhost:3000/auth/google").split(",")
 DJOSER = {
     "USER_CREATE_PASSWORD_RETYPE": True,
     "ACTIVATION_URL": "activation/{uid}/{token}",
@@ -124,6 +136,7 @@ DJOSER = {
     "PASSWORD_RESET_CONFIRM_URL": "password-reset/{uid}/{token}",
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": SOCIAL_REDIRECT_URLS,
     "EMAIL": {
         "activation": "core.emails.ActivationEmail",
         "confirmation": "core.emails.ConfirmationEmail",
@@ -133,6 +146,23 @@ DJOSER = {
         "username_changed_confirmation": "core.emails.UsernameChangedConfirmationEmail",
     },
 }
+
+AUTH_COOKIE = "access"
+AUTH_COOKIE_MAX_AGE = 60 * 60 * 24
+AUTH_COOKIE_SECURE = bool(int(os.environ.get("AUTH_COOKIE_SECURE", default=0)))
+AUTH_COOKIE_HTTP_ONLY = True
+AUTH_COOKIE_PATH = "/"
+AUTH_COOKIE_SAMESITE = "None"
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("GOOGLE_AUTH_KEY")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("GOOGLE_AUTH_SECRET_KEY")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "openid",
+]
+# SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name']
+
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -190,7 +220,7 @@ EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
 
-# TODO: make this nicer
+# TODO: make this nicer cause django-ses is not using EMAIL_* variables
 EMAIL_USE_TLS = True
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)

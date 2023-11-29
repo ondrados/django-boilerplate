@@ -1,22 +1,22 @@
-from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+from django.urls import path, include, re_path
 
-from . import views
+from .views import (
+    CustomProviderAuthView,
+    CustomTokenObtainPairView,
+    CustomTokenRefreshView,
+    CustomTokenVerifyView,
+    LogoutView,
+)
 
 urlpatterns_auth = [
     path("", include("djoser.urls")),
-    path("", include("djoser.urls.jwt")),
-    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-    path("register/", views.RegisterAPIView.as_view(), name="auth_register"),
-    # re_path(r'^password-reset/', include('django_rest_passwordreset.urls', namespace='password-reset')),
-]
-
-urlpatterns_user = [
-    path("me/", views.UserAPIView.as_view(), name="user_detail"),
+    re_path(
+        r"^o/(?P<provider>\S+)/$",
+        CustomProviderAuthView.as_view(),
+        name="provider-auth",
+    ),
+    path("jwt/create/", CustomTokenObtainPairView.as_view()),
+    path("jwt/refresh/", CustomTokenRefreshView.as_view()),
+    path("jwt/verify/", CustomTokenVerifyView.as_view()),
+    path("logout/", LogoutView.as_view()),
 ]
