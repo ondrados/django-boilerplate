@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.urls import include, path
 
 from users.urls import urlpatterns_auth
+from users.urls import urlpatterns_users
 
 
 def root(request):
@@ -13,6 +14,7 @@ def root(request):
 
 urlpatterns_api = [
     path("auth/", include((urlpatterns_auth, "auth-api"), namespace="auth-api")),
+    path("users/", include((urlpatterns_users, "users-api"), namespace="users-api")),
 ]
 
 urlpatterns = [

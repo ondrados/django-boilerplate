@@ -1,4 +1,5 @@
-from django.urls import path, include, re_path
+from django.urls import path, re_path
+from djoser.views import UserViewSet
 
 from .views import (
     CustomProviderAuthView,
@@ -9,7 +10,6 @@ from .views import (
 )
 
 urlpatterns_auth = [
-    path("", include("djoser.urls")),
     re_path(
         r"^o/(?P<provider>\S+)/$",
         CustomProviderAuthView.as_view(),
@@ -19,4 +19,14 @@ urlpatterns_auth = [
     path("jwt/refresh/", CustomTokenRefreshView.as_view()),
     path("jwt/verify/", CustomTokenVerifyView.as_view()),
     path("logout/", LogoutView.as_view()),
+]
+
+urlpatterns_users = [
+    path("me/", UserViewSet.as_view({"get": "me"})),
+    path("register/", UserViewSet.as_view({"post": "create"})),
+    path("activation/", UserViewSet.as_view({"post": "activation"})),
+    path("activation-resend/", UserViewSet.as_view({"post": "resend_activation"})),
+    path("reset-password/", UserViewSet.as_view({"post": "reset_password"})),
+    path("reset-password-confirm/", UserViewSet.as_view({"post": "reset_password_confirm"})),
+    path("change-password/", UserViewSet.as_view({"post": "set_password"})),
 ]
